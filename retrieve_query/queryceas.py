@@ -11,6 +11,8 @@ import pandas as pd
 import csv
 from pathlib import Path
 
+RECLIMIT=15000
+
 def listprevmth(period_inmth):                         
     prevmth_list=[]
     for prevmth in range(period_inmth):
@@ -22,8 +24,9 @@ def listprevmth(period_inmth):
 class Town_to_district_lookup:
     def __init__(self,csvfname):
 
-        df=pd.read_csv(csvfname, header=None, index_col=0, squeeze = True) 
-        self.dict_towntodist=df.to_dict()
+        #df=pd.read_csv(csvfname, header=None, index_col=0, squeeze = True) 
+        df=pd.read_csv(csvfname, header=None, index_col=0)
+        self.dict_towntodist=df.to_dict()[1]
 
     def find_district_for(self, keystr):    
         #print(self.dict_towntodist)
@@ -52,6 +55,8 @@ class Ceastransrecords:
           self.lastrecordidx=int(y['result']['total'])
        
        #To pull all records with valid district number
+       #self.numtopull=RECLIMIT
+       #offset=self.lastrecordidx-self.numtopull
        self.numtopull=self.lastrecordidx-offset
        urlsearch=self.url+'&offset='+str(offset)+'&limit='+str(self.numtopull)
        page_info=requests.get(urlsearch)
@@ -67,24 +72,22 @@ class Ceastransrecords:
               if (self.records_all['result']['records'][countrec]['district']=='-'):
                  townstr=self.records_all['result']['records'][countrec]['town']
                  self.records_all['result']['records'][countrec]['district']=lut.find_district_for(townstr)
-          print(self.records_all)  
-        
-
+          #print(self.records_all)  
 
        return  
 
   
    def findallrecordsbydistrict(self,districtnum,offset):
        urlbydistrictnum=self.url+'&offset='+str(offset)+'&limit='+str(self.numtopull)+'&q='+str(districtnum)
-       print(urlbydistrictnum)
+       #print(urlbydistrictnum)
        page_info=requests.get(urlbydistrictnum)
        if page_info.status_code==200:
        	  soup_page=BeautifulSoup(page_info.content,"html.parser")
        	  scripttags=soup_page.find_all("records")
-          print(soup_page.prettify())
+          #print(soup_page.prettify())
 
           recordsbydistrict=json.loads(str(soup_page))
-          print(len(recordsbydistrict))
+          #print(len(recordsbydistrict))
        
        return recordsbydistrict 
 
@@ -92,10 +95,11 @@ class Ceastransrecords:
        bestagentbydistrict=[]
        #print(type(lutdic))
        for k, v in lutdic.items():
+           #print(f"District number {v}")
            bestagentinthisdistrict=self.findbestagentbydistrict(int(v),period_inmth)
-           print(f"{v} {bestagentinthisdistrict}")
+           #print(f"{v} {bestagentinthisdistrict}")
            bestagentbydistrict.append(bestagentinthisdistrict)
-       print(bestagentbydistrict)
+       #print(bestagentbydistrict)
        with Path(agentbydistcsvfname).open('w',newline='') as f:
            csv_writer = csv.writer(f)
            csv_writer.writerows(bestagentbydistrict)
@@ -117,13 +121,14 @@ class Ceastransrecords:
 
            if (self.records_all['result']['records'][countrec]['district']==strdistrictnum)&\
               (self.records_all['result']['records'][countrec]['transaction_date'] in checkperiodlist)&\
-              (self.records_all['result']['records'][countrec]['transaction_type']['RENTAL'] in Ceastransrecords):
+              ('RENTAL' in self.records_all['result']['records'][countrec]['transaction_type']): 
+             
               agentlist.append(self.records_all['result']['records'][countrec]['salesperson_name'])
-       print(agentlist)
+       #print(agentlist)
 
-       print(len(agentlist))
+       #print(len(agentlist))
        uniqueagentlist = list(set(agentlist))
-       print(len(uniqueagentlist))
+       #print(len(uniqueagentlist))
 
        agenttrans_dict = {uniqueagentlist[i]: 0 for i in range(len(uniqueagentlist))}
        
@@ -134,8 +139,15 @@ class Ceastransrecords:
               count = len([entry for entry in agentlist if entry==uniqueagentlist[i]])
               agenttrans_dict[uniqueagentlist[i]]=count
 
-       bestagent = [k for k, v in agenttrans_dict.items() if v == max(agenttrans_dict.values())]
-       print(bestagent)
+
+       maxsold=0
+       bestagent=[]
+       if len(agenttrans_dict.values())>0:
+
+          bestagent = [k for k, v in agenttrans_dict.items() if v == max(agenttrans_dict.values())]
+          #print(max(agenttrans_dict.values()))
+          maxsold = max(agenttrans_dict.values())
+       print(f"Best Agent in district {strdistrictnum} : {bestagent} sold {maxsold}")
 
 
        return bestagent   
