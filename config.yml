@@ -1,0 +1,6 @@
+offset: 776672
+csvtowntodist: 'C:\\Users\\AdminRND\\OneDrive\\Annamalai\\380_Project\\data_csv\\town_to_district_lookup.csv'
+period_inmth: 6 
+url_ceas: 'https://data.gov.sg/api/action/datastore_search?resource_id=8a087b7c-a11b-4da8-bbb6-ac933f465acd'
+agentbydistcsvfname: 'C:\\Users\\AdminRND\\OneDrive\\Annamalai\\380_Project\\data_csv\\bestagentbydistrict.csv'
+  
