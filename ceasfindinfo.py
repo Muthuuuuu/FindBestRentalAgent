@@ -5,7 +5,7 @@ import yaml
 
 def main():
 
-    configfname='D:\\OneDrive\\Annamalai\\380_Project\\data_csv\\config.yml'
+    configfname='C:\\Users\\AdminRND\\OneDrive\\Annamalai\\380_Project\\data_csv\\config.yml'
     
     #offset=351263
 
