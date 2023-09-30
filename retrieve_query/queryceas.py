@@ -34,8 +34,6 @@ class Town_to_district_lookup:
             if keystr.upper() in k.upper():
                return v
         
-
-
 class Ceastransrecords:
    def __init__(self,url,offset,dicttowntodist):
        self.url=url
@@ -140,14 +138,14 @@ class Ceastransrecords:
               agenttrans_dict[uniqueagentlist[i]]=count
 
 
-       maxsold=0
+       maxtrans=0
        bestagent=[]
        if len(agenttrans_dict.values())>0:
 
           bestagent = [k for k, v in agenttrans_dict.items() if v == max(agenttrans_dict.values())]
           #print(max(agenttrans_dict.values()))
-          maxsold = max(agenttrans_dict.values())
-       print(f"Best Agent in district {strdistrictnum} : {bestagent} sold {maxsold}")
+          maxtrans = max(agenttrans_dict.values())
+       print(f"Best Agent in district {strdistrictnum} : {bestagent} transacted {maxtrans}")
 
 
        return bestagent   
